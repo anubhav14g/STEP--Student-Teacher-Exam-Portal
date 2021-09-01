@@ -1,0 +1,20 @@
+{
+  "name": "step-backend",
+  "version": "1.0.0",
+  "description": "Student Teacher Exam Portal Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "Anubhav Goyal",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.0.3",
+    "nodemailer": "^6.6.3"
+  }
+}
