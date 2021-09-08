@@ -3,6 +3,7 @@ const Test = require("../models/test");
 const Question = require("../models/question");
 const Submission = require("../models/submission");
 const jwt = require('jsonwebtoken');
+const User = require("../models/user");
 
 router.get("/check/status/:test_id",async (req,res)=>{
     
@@ -23,13 +24,26 @@ router.get("/check/status/:test_id",async (req,res)=>{
             });  
         }
         
-        let curr_date = Date.now();
+        // function convertUTCDateToLocalDate(date) {
+        //     var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+        
+        //     var offset = date.getTimezoneOffset() / 60;
+        //     var hours = date.getHours();
+        
+        //     newDate.setHours(hours - offset);
+        //     newDate = newDate.getTime();
+        //     return newDate;  
+        // };
+
+        let curr_date = Date.now()
+
         if(curr_date < test.start_time.valueOf()){
             return res.status(400).json({
                 "status": "false",
                 "message": "Test not started yet",
             });              
         }
+
         if(curr_date > test.end_time.valueOf()){
             return res.status(400).json({
                 "status": "false",
@@ -130,10 +144,27 @@ router.get("/view/all/submissions/:test_id", async (req,res)=>{
     try {
         const allSubmissions= await Submission.find({"test_id": req.params.test_id})
 
+        let allSubmissionsWithInfo = [];
+
+        for(var i=0;i<allSubmissions.length;i++){
+            
+            let user= await User.findById(allSubmissions[i].user_id)
+
+            let obj={
+                'total_score': allSubmissions[i].total_score,
+                'submitted_at': allSubmissions[i].createdAt,
+                'name_of_user': user.name,
+                'user_email': user.email,
+                'user_type': user.type
+            }
+
+            allSubmissionsWithInfo.push(obj);
+        }
+
         return res.status(200).json({
             "status": "true",
             "message": "List of all submissions of this test is below",
-            "allSubmissions": allSubmissions,
+            "allSubmissions": allSubmissionsWithInfo,
         });
     }
     catch(err){
@@ -148,6 +179,14 @@ router.get("/view/all/submissions/:test_id", async (req,res)=>{
 
 
 router.post("/create", async (req,res)=>{
+    
+    if(!req.body.name || !req.body.type || !req.body.total_questions || 
+       !req.body.start_time || !req.body.end_time || !req.body.max_marks){
+        return res.status(400).json({
+            "status": "false",
+            "message": "All fields required...",
+        });
+    }
     
     if(req.body.type!="Mcq" && req.body.type!="Theory"){
         return res.status(400).json({
@@ -166,9 +205,9 @@ router.post("/create", async (req,res)=>{
                 "name": req.body.name,
                 "type": req.body.type,
                 "total_questions": Number(req.body.total_questions),
-                "start_time": new Date(req.body.start_time),
-                "end_time": new Date(req.body.end_time),
-                "duration": req.body.duration,
+                "start_time": req.body.start_time,
+                "end_time": req.body.end_time,
+                // "duration": req.body.duration,
                 "max_marks": Number(req.body.max_marks),
                 "conducted_by_user": verified.userId
             }
@@ -231,6 +270,15 @@ router.post("/add/question/:test_id", async (req,res)=>{
             }
 
             if(test.type=="Mcq"){
+                
+                if(!req.body.question || !req.body.option1 || !req.body.option2 || 
+                    !req.body.option3 || !req.body.option4 || !req.body.solution){
+                        return res.status(400).json({
+                            "status": "false",
+                            "message": "All fields required for Mcq test...",
+                        });
+                }
+                
                 const obj2 = {
                     "question": req.body.question,
                     "option1": req.body.option1,
@@ -244,6 +292,14 @@ router.post("/add/question/:test_id", async (req,res)=>{
             }
 
             if(test.type=="Theory"){
+                
+                if(!req.body.question){
+                    return res.status(400).json({
+                        "status": "false",
+                        "message": "Question required for theory test...",
+                    });
+                }
+
                 const obj2 = {
                     "question": req.body.question,
                     "test_id": req.params.test_id

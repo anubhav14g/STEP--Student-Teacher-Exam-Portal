@@ -24,7 +24,7 @@ const testSchema = new mongoose.Schema({
     },
     duration: {
         type: String,
-        required: true
+        // required: true
     },
     max_marks: {
         type: Number,
