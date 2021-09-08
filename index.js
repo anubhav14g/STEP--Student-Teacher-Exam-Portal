@@ -32,12 +32,14 @@ const authRoute=require('./routes/auth');
 const testRoute=require('./routes/test');
 const submitRoute=require('./routes/submit');
 const queryRoute=require('./routes/query');
+const adminRoute=require('./routes/admin');
 
 //Route Middleware
 app.use('/api/auth',authRoute);
 app.use('/api/test',testRoute);
 app.use('/api/submit',submitRoute);
 app.use('/api/query',queryRoute);
+app.use('/api/admin',adminRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(`${PORT}`, function() {

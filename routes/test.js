@@ -35,16 +35,20 @@ router.get("/check/status/:test_id",async (req,res)=>{
         //     return newDate;  
         // };
 
-        let curr_date = Date.now()
+        let curr_date = new Date()
 
-        if(curr_date < test.start_time.valueOf()){
+        console.log(curr_date);
+        console.log(test.start_time);
+        console.log(test.end_time);
+
+        if(curr_date < test.start_time){
             return res.status(400).json({
                 "status": "false",
                 "message": "Test not started yet",
             });              
         }
 
-        if(curr_date > test.end_time.valueOf()){
+        if(curr_date > test.end_time){
             return res.status(400).json({
                 "status": "false",
                 "message": "Test has ended",
@@ -188,12 +192,12 @@ router.post("/create", async (req,res)=>{
         });
     }
     
-    if(req.body.type!="Mcq" && req.body.type!="Theory"){
-        return res.status(400).json({
-            "status": "false",
-            "message": "Incorrect input, enter correct type",
-        });
-    }
+    // if(req.body.type!="Mcq" && req.body.type!="Theory"){
+    //     return res.status(400).json({
+    //         "status": "false",
+    //         "message": "Incorrect input, enter correct type",
+    //     });
+    // }
 
     try {
         let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;

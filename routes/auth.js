@@ -4,19 +4,33 @@ const jwt = require('jsonwebtoken');
 
 router.post("/register/user",async (req,res)=>{
     
-    if(req.body.phone_no.length!=10 || req.body.pin.length!=6){
+    if(!req.body.name || !req.body.email || !req.body.type || !req.body.pin){
         return res.status(400).json({
             "status": "false",
-            "message": "Incorrect input, Phone no must be of 10 digits and Pin must be of 6 digits"
+            "message": "Name, email , type & PIN are required"
+        });
+    }
+    
+    if(req.body.phone_no && req.body.phone_no.length!=10){
+        return res.status(400).json({
+            "status": "false",
+            "message": "Incorrect input, Phone no must be of 10 digits"
         });
     }
 
-    if(req.body.type!="Teacher" && req.body.type!="Student"){
+    if(req.body.pin.length!=6){
         return res.status(400).json({
             "status": "false",
-            "message": "Incorrect input, enter correct type"
+            "message": "Incorrect input, Pin must be of 6 digits"
         });
     }
+
+    // if(req.body.type!="Teacher" && req.body.type!="Student"){
+    //     return res.status(400).json({
+    //         "status": "false",
+    //         "message": "Incorrect input, enter correct type"
+    //     });
+    // }
 
     const obj ={
         "name": req.body.name,
