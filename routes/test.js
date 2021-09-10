@@ -99,7 +99,7 @@ router.get("/view/all/tests", async (req,res)=>{
         console.log(err);
         res.status(400).json({
             "status": "false",
-            "message": "Some error occured!",
+            "message": "Some error occured, May be you are not logged in",
         });
     }
 
@@ -116,6 +116,19 @@ router.get("/view/all/questions/:test_id", async (req,res)=>{
     }
 
     try {
+        
+        let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+        let jwtSecretKey = process.env.JWT_SECRET_KEY;
+        const token = req.header(tokenHeaderKey);
+        const verified = jwt.verify(token, jwtSecretKey);
+
+        if(verified.userId!=test.conducted_by_user){
+            res.status(400).json({
+                "status": "false",
+                "message": "You are not authorised to view this page",
+            });
+        }
+        
         const allQuestions= await Question.find({"test_id": req.params.test_id})
 
         return res.status(200).json({
@@ -128,7 +141,7 @@ router.get("/view/all/questions/:test_id", async (req,res)=>{
         console.log(err);
         res.status(400).json({
             "status": "false",
-            "message": "Some error occured!",
+            "message": "Some error occured, May be you are not logged in",
         });
     }
 
@@ -146,6 +159,19 @@ router.get("/view/all/submissions/:test_id", async (req,res)=>{
     }
 
     try {
+        
+        let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+        let jwtSecretKey = process.env.JWT_SECRET_KEY;
+        const token = req.header(tokenHeaderKey);
+        const verified = jwt.verify(token, jwtSecretKey);
+
+        if(verified.userId!=test.conducted_by_user){
+            res.status(400).json({
+                "status": "false",
+                "message": "You are not authorised to view this page",
+            });
+        }
+        
         const allSubmissions= await Submission.find({"test_id": req.params.test_id})
 
         let allSubmissionsWithInfo = [];
@@ -175,7 +201,7 @@ router.get("/view/all/submissions/:test_id", async (req,res)=>{
         console.log(err);
         res.status(400).json({
             "status": "false",
-            "message": "Some error occured!",
+            "message": "Some error occured, May be you are not logged in",
         });
     }
 
@@ -235,7 +261,7 @@ router.post("/create", async (req,res)=>{
         console.log(err);
         res.status(400).json({
             "status": "false",
-            "message": "Some error occured!",
+            "message": "Some error occured, May be you are not logged in",
         });
     }
 
@@ -331,7 +357,7 @@ router.post("/add/question/:test_id", async (req,res)=>{
         console.log(err);
         res.status(400).json({
             "status": "false",
-            "message": "Some error occured!",
+            "message": "Some error occured, May be you are not logged in",
         });
     }
 
