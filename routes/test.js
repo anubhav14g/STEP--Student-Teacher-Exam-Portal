@@ -23,32 +23,21 @@ router.get("/check/status/:test_id",async (req,res)=>{
                 "message": "You can't take the test as it is of theory not mcq",
             });  
         }
-        
-        // function convertUTCDateToLocalDate(date) {
-        //     var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
-        
-        //     var offset = date.getTimezoneOffset() / 60;
-        //     var hours = date.getHours();
-        
-        //     newDate.setHours(hours - offset);
-        //     newDate = newDate.getTime();
-        //     return newDate;  
-        // };
 
-        let curr_date = new Date()
+        let curr_date = Date.now()
 
         console.log(curr_date);
-        console.log(test.start_time);
-        console.log(test.end_time);
+        console.log(test.start_time.valueOf());
+        console.log(test.end_time.valueOf());
 
-        if(curr_date < test.start_time){
+        if(curr_date < test.start_time.valueOf()){
             return res.status(400).json({
                 "status": "false",
                 "message": "Test not started yet",
             });              
         }
 
-        if(curr_date > test.end_time){
+        if(curr_date > test.end_time.valueOf()){
             return res.status(400).json({
                 "status": "false",
                 "message": "Test has ended",
@@ -231,12 +220,14 @@ router.post("/create", async (req,res)=>{
         const token = req.header(tokenHeaderKey);
         const verified = jwt.verify(token, jwtSecretKey);
         if(verified){
+            console.log(new Date(req.body.start_time))
+            console.log(new Date(req.body.end_time))
             const obj ={
                 "name": req.body.name,
                 "type": req.body.type,
                 "total_questions": Number(req.body.total_questions),
-                "start_time": req.body.start_time,
-                "end_time": req.body.end_time,
+                "start_time": new Date(req.body.start_time),
+                "end_time": new Date(req.body.end_time),
                 // "duration": req.body.duration,
                 "max_marks": Number(req.body.max_marks),
                 "conducted_by_user": verified.userId
