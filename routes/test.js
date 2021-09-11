@@ -106,18 +106,6 @@ router.get("/view/all/questions/:test_id", async (req,res)=>{
 
     try {
         
-        let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
-        let jwtSecretKey = process.env.JWT_SECRET_KEY;
-        const token = req.header(tokenHeaderKey);
-        const verified = jwt.verify(token, jwtSecretKey);
-
-        if(verified.userId!=test.conducted_by_user){
-            res.status(400).json({
-                "status": "false",
-                "message": "You are not authorised to view this page",
-            });
-        }
-        
         const allQuestions= await Question.find({"test_id": req.params.test_id})
 
         return res.status(200).json({
