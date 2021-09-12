@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     },
     // Must be of 6 digits
     pin: {
-        type: Number,
+        type: String,
         required: true
     },
     is_email_verified: {

@@ -1,6 +1,7 @@
 const router = require("express").Router()
 const User = require("../models/user");
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 router.post("/register/user",async (req,res)=>{
     
@@ -25,18 +26,13 @@ router.post("/register/user",async (req,res)=>{
         });
     }
 
-    // if(req.body.type!="Teacher" && req.body.type!="Student"){
-    //     return res.status(400).json({
-    //         "status": "false",
-    //         "message": "Incorrect input, enter correct type"
-    //     });
-    // }
+    const hashedPassword = await bcrypt.hash(req.body.pin,7);
 
     const obj ={
         "name": req.body.name,
         "email": req.body.email,
         "phone_no": Number(req.body.phone_no),
-        "pin": Number(req.body.pin),
+        "pin": hashedPassword,
         "type": req.body.type
     }
     try{
@@ -72,7 +68,10 @@ router.post("/login/user",async (req,res)=>{
                 "message": "No user found, plz register first",
             });
         }
-        if(found.pin!=Number(req.body.pin)){
+
+        const isSamePin = await bcrypt.compare(req.body.pin,found.pin);
+
+        if(!isSamePin){
             return res.status(400).json({
                 "status": "false",
                 "message": "Password does not match",
