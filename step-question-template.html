@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>STEP</title>
+  </head>
+  <body>
+    {{#each questions}}
+    <h3>Ques: {{this.question}}</h3>
+    <ul>
+      {{this.option1}}
+      <br>
+      {{this.option2}}
+      <br>
+      {{this.option3}}
+      <br>
+      {{this.option4}}
+      <br />
+    </ul>
+    {{/each}}
+  </body>
+</html>

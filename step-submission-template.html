@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>STEP</title>
+  </head>
+  <body>
+    <ul>
+      {{#each allSubmissionsWithInfo}}
+      <li>Name: {{this.name_of_user}}
+      <br>
+      Email: {{this.user_email}}
+      <br>
+      Type: {{this.user_type}}
+      <br>
+      Total Score: {{this.total_score}}
+      <br>
+      Submitted At: {{this.submitted_at}}
+    </li>
+      <br />
+      {{/each}}
+    </ul>
+  </body>
+</html>

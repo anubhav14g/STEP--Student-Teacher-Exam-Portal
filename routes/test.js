@@ -4,6 +4,189 @@ const Question = require("../models/question");
 const Submission = require("../models/submission");
 const jwt = require('jsonwebtoken');
 const User = require("../models/user");
+const pdf = require("pdf-creator-node");
+const fs = require("fs");
+const path = require( 'path' );
+
+router.get('/create/pdf/questions/test/:test_id',async (req,res)=>{
+    const test= await Test.findById(req.params.test_id);
+    if(!test){
+        return res.status(400).json({
+            "status": "false",
+            "message": "Test not found",
+        });
+    }
+
+    const allQuestions= await Question.find({"test_id": req.params.test_id})
+    
+    try{
+        
+        let html = fs.readFileSync("step-question-template.html", "utf8");
+        
+        let options = {
+            format: "A4",
+            orientation: "portrait",
+            border: "10mm",
+            header: {
+                contents: '<div style="text-align: center;"><b><h1>Student Teacher Exam Portal (STEP)</h1></b></div>'
+            },
+        };
+        
+        let array=[];
+
+        for(var i=0;i<allQuestions.length;i++){
+            array.push({
+                'question': allQuestions[i].question,
+                'option1': test.type=='Theory' ? '' : `1. ${allQuestions[i].option1}`,
+                'option2': test.type=='Theory' ? '' : `2. ${allQuestions[i].option2}`,
+                'option3': test.type=='Theory' ? '' : `3. ${allQuestions[i].option3}`,
+                'option4': test.type=='Theory' ? '' : `4. ${allQuestions[i].option4}`,
+            })
+        }
+
+        let document = {
+            html: html,
+            data: {
+              questions: array,
+            },
+            path: "./step-pdf.pdf",
+            type: "",
+        };
+
+        pdf.create(document, options)
+        .then((file) => {
+            fs.readFile(path.join(__dirname,'../step-pdf.pdf'), (err, data) => {
+                if (err) {
+                  console.error(err)
+                  return res.status(400).json({
+                        "status": "false",
+                        "message": "Some error occured!",
+                    });
+                }
+                res.type('application/pdf')
+                res.send(data);
+                fs.unlink(path.join(__dirname,'../step-pdf.pdf'),()=>{
+                    console.log('Pdf created successfully')
+                })
+            }) 
+        
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(400).json({
+                "status": "false",
+                "message": "Some error occured!",
+            });
+        });
+    }
+    catch(err){
+        console.log(err);
+        res.status(400).json({
+            "status": "false",
+            "message": "Some error occured!",
+        });
+    }
+})
+
+
+router.get('/create/pdf/submissions/test/:test_id',async (req,res)=>{
+    const test= await Test.findById(req.params.test_id);
+    if(!test){
+        return res.status(400).json({
+            "status": "false",
+            "message": "Test not found",
+        });
+    }
+
+    try {
+        
+        // let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+        // let jwtSecretKey = process.env.JWT_SECRET_KEY;
+        // const token = req.header(tokenHeaderKey);
+        // const verified = jwt.verify(token, jwtSecretKey);
+
+        // if(verified.userId!=test.conducted_by_user){
+        //     res.status(400).json({
+        //         "status": "false",
+        //         "message": "You are not authorised to view this page",
+        //     });
+        // }
+        
+        const allSubmissions= await Submission.find({"test_id": req.params.test_id})
+
+        let allSubmissionsWithInfo = [];
+
+        for(var i=0;i<allSubmissions.length;i++){
+            
+            let user= await User.findById(allSubmissions[i].user_id)
+
+            let obj={
+                'total_score': allSubmissions[i].total_score,
+                'submitted_at': allSubmissions[i].createdAt,
+                'name_of_user': user.name,
+                'user_email': user.email,
+                'user_type': user.type
+            }
+
+            allSubmissionsWithInfo.push(obj);
+        }
+
+        let html = fs.readFileSync("step-submission-template.html", "utf8");
+        
+        let options = {
+            format: "A4",
+            orientation: "portrait",
+            border: "10mm",
+            header: {
+                contents: '<div style="text-align: center;"><b><h1>Student Teacher Exam Portal (STEP)</h1></b></div>'
+            },
+        };
+
+        let document = {
+            html: html,
+            data: {
+                allSubmissionsWithInfo: allSubmissionsWithInfo,
+            },
+            path: "./step-pdf.pdf",
+            type: "",
+        };
+
+        pdf.create(document, options)
+        .then((file) => {
+            fs.readFile(path.join(__dirname,'../step-pdf.pdf'), (err, data) => {
+                if (err) {
+                  console.error(err)
+                  return res.status(400).json({
+                        "status": "false",
+                        "message": "Some error occured!",
+                    });
+                }
+                res.type('application/pdf')
+                res.send(data);
+                fs.unlink(path.join(__dirname,'../step-pdf.pdf'),()=>{
+                    console.log('Pdf created successfully')
+                })
+            }) 
+        
+        })
+        .catch((error) => {
+            console.error(error);
+            res.status(400).json({
+                "status": "false",
+                "message": "Some error occured!",
+            });
+        });
+
+    }
+    catch(err){
+        console.log(err);
+        res.status(400).json({
+            "status": "false",
+            "message": "Some error occured, May be you are not logged in",
+        });
+    }
+})
+
 
 router.get("/check/status/:test_id",async (req,res)=>{
     
